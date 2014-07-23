@@ -244,6 +244,8 @@ public class ColorGUI {
 		// panel_12.add(processImagesButton);
 		
 		JPanel panel_4 = new JPanel();
+		
+		
 		selectImagesPanel.add(panel_4);
 		
 		
@@ -254,6 +256,22 @@ public class ColorGUI {
 		final JScrollPane imageListScrollPane = new JScrollPane(imageList);
 		
 		imageListScrollPane.setPreferredSize(new Dimension(500, 200));
+		
+		
+		JPanel selectAllPanel = new JPanel(new GridLayout(0, 1, 0, 0));
+		
+		final JButton selectAllButton = new JButton("Select All");
+		selectAllButton.setEnabled(false);
+		final JButton deselectAllButton = new JButton("Deselect All");
+		deselectAllButton.setEnabled(false);
+		
+		selectAllPanel.add(selectAllButton);
+		selectAllPanel.add(deselectAllButton);
+		
+		
+		panel_4.add(selectAllPanel);
+		
+		
 		
 		panel_4.add(imageListScrollPane);
 		panel_4.add(processImagesButton);
@@ -567,6 +585,9 @@ public class ColorGUI {
 				applyTrackingLimitButton.setEnabled(false);
 				DefaultListModel listModel = (DefaultListModel) imageList.getModel();
 				listModel.removeAllElements();
+				
+				selectAllButton.setEnabled(false);
+				deselectAllButton.setEnabled(false);
 			}
 		});
 		
@@ -582,6 +603,9 @@ public class ColorGUI {
 				
 				directoryField.setEnabled(false);
 				directoryBrowseButton.setEnabled(false);
+				
+				selectAllButton.setEnabled(true);
+				deselectAllButton.setEnabled(true);
 				
 				
 				
@@ -832,6 +856,34 @@ public class ColorGUI {
 					
 					
 				}
+				
+			}
+			
+		});
+		
+		
+		
+		selectAllButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				DefaultListModel model = (DefaultListModel) imageList.getModel();
+				int start=0;
+				int end = model.getSize()-1;
+				
+				if (end>0) {
+					imageList.setSelectionInterval(start, end);
+				}
+				
+			}
+			
+		});
+		
+		deselectAllButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				imageList.clearSelection();
 				
 			}
 			
