@@ -110,6 +110,8 @@ public class RepColors {
     public static double colorDistance(Color a, Color b) {
         return Math.sqrt(Math.pow(a.getRed()-b.getRed(), 2) + Math.pow(a.getGreen()-b.getGreen(), 2) + Math.pow(a.getBlue()-b.getBlue(),2));
     }
+    
+    
 }
 
 /**

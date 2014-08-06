@@ -23,6 +23,8 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
+import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 import javax.swing.Box;
@@ -48,6 +50,10 @@ import java.awt.FlowLayout;
 
 import javax.swing.JPasswordField;
 
+import com.jcraft.jsch.JSchException;
+
+import javax.swing.JSeparator;
+
 public class ColorGUI {
 
 	private JFrame frame;
@@ -69,6 +75,11 @@ public class ColorGUI {
 	private JTextField dbNameField;
 	private JTextField dbUsernameField;
 	private JPasswordField dbPasswordField;
+	private JTextField sshHostField;
+	private JTextField sshUserField;
+	private JTextField sshPortField;
+	private JPasswordField sshPasswordField;
+	private JTextField dbPortField;
 
 	/**
 	 * Launch the application.
@@ -111,29 +122,12 @@ public class ColorGUI {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		//Get dbconfig info:
-		LinkedList<String> dbInfo = new LinkedList<String>();
-		try {
-			FileInputStream dbConf = new FileInputStream("dbconfig.txt");
-			BufferedReader dbConfReader = new BufferedReader(new InputStreamReader(dbConf));
-			String line;
-			
-			while ((line = dbConfReader.readLine()) != null) {
-				dbInfo.add(line);
-			}
-			
-		} catch (FileNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-			JOptionPane.showMessageDialog(null, "Could not find dbconfig.txt. Aborting!");
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-			JOptionPane.showMessageDialog(null, "Could not read dbconfig.txt. Aborting!");
-		}
 		
 		
 		
+		
+		
+		/*Initialize all Swing components */
 		
 		frame = new JFrame();
 		frame.setBounds(100, 100, 450, 300);
@@ -158,7 +152,7 @@ public class ColorGUI {
 		
 		JPanel panel_6 = new JPanel();
 		panel_3.add(panel_6, BorderLayout.CENTER);
-		panel_6.setLayout(new GridLayout(0, 2, 0, 0));
+		panel_6.setLayout(new GridLayout(0, 1, 0, 0));
 		
 		JPanel panel_7 = new JPanel();
 		panel_6.add(panel_7);
@@ -167,9 +161,9 @@ public class ColorGUI {
 		ButtonGroup selectImportMethodGroup = new ButtonGroup();
 		final JRadioButton databaseImportRadioButton = new JRadioButton("Import images directly from database");
 		selectImportMethodGroup.add(databaseImportRadioButton);
-		panel_7.add(databaseImportRadioButton);
+		//panel_7.add(databaseImportRadioButton);
 		
-		JLabel lblNewLabel_1 = new JLabel("Limit VT_TRACKING ID to a specific range:");
+		JLabel lblNewLabel_1 = new JLabel("Limit VT_TRACKING ID to a specific range (Leave blank to show all):");
 		panel_7.add(lblNewLabel_1);
 		
 		JPanel panel_9 = new JPanel();
@@ -179,7 +173,9 @@ public class ColorGUI {
 		panel_9.add(lblNewLabel_2);
 		
 		vtTrackingStartField = new JTextField();
-		vtTrackingStartField.setEnabled(false);
+		
+
+		
 		panel_9.add(vtTrackingStartField);
 		vtTrackingStartField.setColumns(15);
 		
@@ -190,7 +186,9 @@ public class ColorGUI {
 		panel_10.add(lblNewLabel_3);
 		
 		vtTrackingEndField = new JTextField();
-		vtTrackingEndField.setEnabled(false);
+		
+		
+		
 		panel_10.add(vtTrackingEndField);
 		vtTrackingEndField.setColumns(15);
 		
@@ -201,11 +199,11 @@ public class ColorGUI {
 		
 		final JButton applyTrackingLimitButton = new JButton("Apply VT_TRACKING Limit");
 		applyTrackingLimitButton.setHorizontalAlignment(SwingConstants.RIGHT);
-		applyTrackingLimitButton.setEnabled(false);
+		applyTrackingLimitButton.setEnabled(true);
 		panel_27.add(applyTrackingLimitButton);
 		
 		JPanel panel_8 = new JPanel();
-		panel_6.add(panel_8);
+		//panel_6.add(panel_8);
 		panel_8.setLayout(new GridLayout(0, 1, 0, 0));
 		
 		JRadioButton directoryImportRadioButton = new JRadioButton("Import images from folder on file system");
@@ -261,9 +259,9 @@ public class ColorGUI {
 		JPanel selectAllPanel = new JPanel(new GridLayout(0, 1, 0, 0));
 		
 		final JButton selectAllButton = new JButton("Select All");
-		selectAllButton.setEnabled(false);
+		selectAllButton.setEnabled(true);
 		final JButton deselectAllButton = new JButton("Deselect All");
-		deselectAllButton.setEnabled(false);
+		deselectAllButton.setEnabled(true);
 		
 		selectAllPanel.add(selectAllButton);
 		selectAllPanel.add(deselectAllButton);
@@ -298,14 +296,25 @@ public class ColorGUI {
 		selectOutputRadioGroup.add(databaseOutputRadioButton);
 		panel_15.add(databaseOutputRadioButton);
 		
+		
+		
 		final JRadioButton sqlOutputRadioButton = new JRadioButton("Output generated colors to SQL file for future import");
 		selectOutputRadioGroup.add(sqlOutputRadioButton);
-		sqlOutputRadioButton.setSelected(true);
+		
+
+
+		
+		
 		panel_15.add(sqlOutputRadioButton);
 		
 		JRadioButton sqlAndDatabaseRadioButton = new JRadioButton("Output to database and SQL file");
 		selectOutputRadioGroup.add(sqlAndDatabaseRadioButton);
 		panel_15.add(sqlAndDatabaseRadioButton);
+		
+		
+		
+		
+		
 		
 		JPanel panel_19 = new JPanel();
 		panel_15.add(panel_19);
@@ -314,6 +323,9 @@ public class ColorGUI {
 		panel_19.add(lblNewLabel_7);
 		
 		sqlPathField = new JTextField();
+		
+		
+		
 		panel_19.add(sqlPathField);
 		sqlPathField.setColumns(20);
 		
@@ -340,6 +352,12 @@ public class ColorGUI {
 		final JCheckBox debugOutputCheckbox = new JCheckBox("Debug output");
 		panel_18.add(debugOutputCheckbox);
 		
+		
+		
+		
+		
+		
+		
 		JPanel panel_13 = new JPanel();
 		outputPrefPanel.add(panel_13);
 		panel_13.setLayout(new GridLayout(2, 1, 0, 0));
@@ -351,12 +369,65 @@ public class ColorGUI {
 		JLabel lblNumberOfRepresentative = new JLabel("Number of Representative Colors to generate per image:");
 		panel_16.add(lblNumberOfRepresentative);
 		
+		JPanel spinnerPanel = new JPanel();
+		FlowLayout flowLayout_1 = (FlowLayout) spinnerPanel.getLayout();
+		flowLayout_1.setAlignment(FlowLayout.LEFT);
+		
 		final JSpinner numColorSpinner = new JSpinner();
 		numColorSpinner.setValue(10);
-		panel_16.add(numColorSpinner);
+		
+		
+		
+		numColorSpinner.setPreferredSize(new Dimension(100, 20));
+		
+		spinnerPanel.add(numColorSpinner);
+		
+		panel_16.add(spinnerPanel);
 		
 		JPanel panel_17 = new JPanel();
 		panel_13.add(panel_17);
+		panel_17.setLayout(new GridLayout(0, 1, 0, 0));
+		
+		JLabel lblNewLabel_11 = new JLabel("Resize image to the following dimensions (Leave 0 for no resize): ");
+		panel_17.add(lblNewLabel_11);
+		
+		JPanel widthPanel = new JPanel();
+		FlowLayout flowLayout_2 = (FlowLayout) widthPanel.getLayout();
+		flowLayout_2.setAlignment(FlowLayout.LEFT);
+		JPanel heightPanel = new JPanel();
+		FlowLayout flowLayout_3 = (FlowLayout) heightPanel.getLayout();
+		flowLayout_3.setAlignment(FlowLayout.LEFT);
+		
+		panel_17.add(widthPanel);
+		
+		JLabel lblHeiht = new JLabel("Width:");
+		widthPanel.add(lblHeiht);
+		
+		final JSpinner widthSpinner = new JSpinner();
+		widthSpinner.setValue(0);
+		
+		
+		
+		widthSpinner.setPreferredSize(new Dimension(100, 20));
+		widthPanel.add(widthSpinner);
+		panel_17.add(heightPanel);
+		
+		JLabel lblHeight = new JLabel("Height");
+		heightPanel.add(lblHeight);
+		
+		final JSpinner heightSpinner = new JSpinner();
+		heightSpinner.setValue(0);
+		
+	
+		heightSpinner.setPreferredSize(new Dimension(100, 20));
+		heightPanel.add(heightSpinner);
+		
+		Component horizontalStrut_3 = Box.createHorizontalStrut(400);
+		heightPanel.add(horizontalStrut_3);
+		
+		JButton saveButton = new JButton("Save Current Settings");
+		
+		heightPanel.add(saveButton);
 		
 		JPanel colorCorrectPanel = new JPanel();
 		tabbedPane.addTab("Color Correction", null, colorCorrectPanel, null);
@@ -383,11 +454,18 @@ public class ColorGUI {
 		hueSlider.setValue(0);
 		hueSlider.setMaximum(128);
 		hueSlider.setMinimum(-128);
+		
+		
+		
 		hueSlider.setPreferredSize(new Dimension(300, 50));
 		panel_23.add(hueSlider);
 		
 		final JSpinner hueSpinner = new JSpinner();
 		hueSpinner.setValue(0);
+		
+		
+		
+		
 		
 		hueSpinner.setPreferredSize(new Dimension(300, 50));
 		panel_23.add(hueSpinner);
@@ -410,7 +488,12 @@ public class ColorGUI {
 		
 		final JSpinner satSpinner = new JSpinner();
 		satSpinner.setPreferredSize(new Dimension(300, 50));
+		
+		
+		
 		panel_24.add(satSpinner);
+		
+		
 		
 		Component horizontalStrut_1 = Box.createHorizontalStrut(241);
 		panel_24.add(horizontalStrut_1);
@@ -430,6 +513,9 @@ public class ColorGUI {
 		
 		final JSpinner valSpinner = new JSpinner();
 		valSpinner.setPreferredSize(new Dimension(300, 50));
+		
+
+		
 		panel_25.add(valSpinner);
 		
 		Component horizontalStrut_2 = Box.createHorizontalStrut(215);
@@ -441,6 +527,78 @@ public class ColorGUI {
 		JPanel dbConfigPanel = new JPanel();
 		tabbedPane.addTab("Database Configuration", null, dbConfigPanel, null);
 		dbConfigPanel.setLayout(new GridLayout(0, 1, 0, 0));
+		
+		JPanel sshInfo = new JPanel();
+		dbConfigPanel.add(sshInfo);
+		sshInfo.setLayout(new GridLayout(0, 1, 0, 0));
+		
+		JPanel panel_2 = new JPanel();
+		sshInfo.add(panel_2);
+		
+		JLabel lblPleaseEnterYour = new JLabel("Please enter your SSH information:");
+		panel_2.add(lblPleaseEnterYour);
+		
+		JPanel panel_32 = new JPanel();
+		sshInfo.add(panel_32);
+		
+		JLabel lblSshHost = new JLabel("SSH Host:");
+		panel_32.add(lblSshHost);
+		
+		JSeparator separator = new JSeparator();
+		panel_32.add(separator);
+		
+		sshHostField = new JTextField();
+		//sshHostField.setText(configMap.get(0));
+		
+
+		
+		panel_32.add(sshHostField);
+		sshHostField.setColumns(10);
+		
+		JPanel panel_34 = new JPanel();
+		sshInfo.add(panel_34);
+		
+		JLabel lblSshPort = new JLabel("SSH Port: ");
+		panel_34.add(lblSshPort);
+		
+		sshPortField = new JTextField();
+		//sshPortField.setText(configMap.get(1));
+		
+
+		
+		
+		
+		panel_34.add(sshPortField);
+		sshPortField.setColumns(10);
+		
+		JPanel panel_31 = new JPanel();
+		sshInfo.add(panel_31);
+		
+		JLabel lblSshUsername = new JLabel("SSH Username:");
+		panel_31.add(lblSshUsername);
+		
+		sshUserField = new JTextField();
+		//sshUserField.setText(configMap.get(2));
+		
+	
+		
+		
+		panel_31.add(sshUserField);
+		sshUserField.setColumns(10);
+		
+		JPanel panel_33 = new JPanel();
+		sshInfo.add(panel_33);
+		
+		JLabel lblSshPassword = new JLabel("SSH Password: ");
+		panel_33.add(lblSshPassword);
+		
+		sshPasswordField = new JPasswordField();
+		sshPasswordField.setColumns(10);
+		//sshPasswordField.setText(configMap.get(3));
+		
+
+		
+		panel_33.add(sshPasswordField);
 		
 		JPanel panel_1 = new JPanel();
 		dbConfigPanel.add(panel_1);
@@ -459,9 +617,29 @@ public class ColorGUI {
 		panel_26.add(lblHost);
 		
 		dbHostField = new JTextField();
-		dbHostField.setText(dbInfo.get(0));
+		//dbHostField.setText(configMap.get(4));
+		
+
+		
+		
 		panel_26.add(dbHostField);
 		dbHostField.setColumns(10);
+		
+		JPanel panel_35 = new JPanel();
+		panel_1.add(panel_35);
+		
+		JLabel lblPort = new JLabel("Port:");
+		panel_35.add(lblPort);
+		
+		dbPortField = new JTextField();
+		//dbPortField.setText(configMap.get(5));
+		
+
+
+		
+		
+		panel_35.add(dbPortField);
+		dbPortField.setColumns(10);
 		
 		JPanel panel_28 = new JPanel();
 		panel_1.add(panel_28);
@@ -470,7 +648,12 @@ public class ColorGUI {
 		panel_28.add(lblDbName);
 		
 		dbNameField = new JTextField();
-		dbNameField.setText(dbInfo.get(1));
+		//dbNameField.setText(configMap.get(6));
+		
+
+
+		
+		
 		panel_28.add(dbNameField);
 		dbNameField.setColumns(10);
 		
@@ -481,7 +664,12 @@ public class ColorGUI {
 		panel_29.add(lblUsername);
 		
 		dbUsernameField = new JTextField();
-		dbUsernameField.setText(dbInfo.get(2));
+		//dbUsernameField.setText(configMap.get(7));
+		
+
+
+		
+		
 		panel_29.add(dbUsernameField);
 		dbUsernameField.setColumns(10);
 		
@@ -492,12 +680,14 @@ public class ColorGUI {
 		panel_30.add(lblPassword);
 		
 		dbPasswordField = new JPasswordField();
-		dbPasswordField.setText(dbInfo.get(3));
+		//dbPasswordField.setText(configMap.get(8));
+		
+
+
+		
+		
 		dbPasswordField.setColumns(10);
 		panel_30.add(dbPasswordField);
-		
-		JPanel panel_2 = new JPanel();
-		dbConfigPanel.add(panel_2);
 		
 		final JPanel viewColorPanel = new JPanel();
 		
@@ -517,8 +707,11 @@ public class ColorGUI {
 		final JPanel debugPanel = new JPanel();
 		
 		
-		JTextArea debugTextArea = new JTextArea();
+		final JTextArea debugTextArea = new JTextArea();
 		debugPanel.add(debugTextArea);
+		
+		JButton clearButton = new JButton("Clear Debug Text");
+		debugPanel.add(clearButton);
 		
 		 debugUtil = new DebugUtil(debugTextArea);
 		 
@@ -530,6 +723,9 @@ public class ColorGUI {
 		
 		 final JScrollPane outputScrollPane = new JScrollPane(textOutputArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		 outputScrollPane.setPreferredSize(new Dimension(450, 350));
+		 
+		 JButton rgbClearButton = new JButton("Clear RGB text");
+		 rgbOutputPanel.add(rgbClearButton);
 		 rgbOutputPanel.add(outputScrollPane);
 		 
 		 
@@ -540,29 +736,194 @@ public class ColorGUI {
 		 
 		 
 		 
+		 /*We see if there's a file with saved configuration settings and load it in if there is*/
+		 /*Saved settings will be available in configMap hashmap */
+		 HashMap<String, String> configMap = new HashMap();
+		 try {
+			FileInputStream dbConf = new FileInputStream("config.txt");
+			BufferedReader dbConfReader = new BufferedReader(new InputStreamReader(dbConf));
+			String line;
+			String[] parts;
+			String name;
+			String value;
+			while ((line = dbConfReader.readLine()) != null) {
+				if (line.split(":").length>1) {
+					parts = line.split(":");
+					name = parts[0];
+					value = parts[1];
+					configMap.put(name, value);
+					
+				
+				}
+			}
+			
+			dbConfReader.close();
+			
+
+			
+		 } catch (FileNotFoundException e1) {
+			/*If the file doesn't exist we don't have to do anything*/
+			debugUtil.debug("No config file fount...", debug);
+
+		 } catch (IOException e1) {
+			JOptionPane.showMessageDialog(null, "Config file is not formatted correctly. Ignoring...");
+
+
+		 }
 		 
-		//Create the browse windows for choosing a directory to import or an SQL file to save to
-		directoryBrowseButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                chooser = new JFileChooser();
-                chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-                chooser.setAcceptAllFileFilterUsed(false);
-                int retval = chooser.showOpenDialog(null);
-                if (retval == JFileChooser.APPROVE_OPTION) {
-                    directoryField.setText(chooser.getSelectedFile().getAbsolutePath());
-                }
-                
-                LinkedList<File> files = new LinkedList<>();
-                recurseDirectory(new File(directoryField.getText()), files);
-                
-                if (!files.isEmpty()) {
-                	processImagesButton.setEnabled(true);
-                }
-                else {
-                	processImagesButton.setEnabled(false);
-                }
-            }
-        });
+		 
+		 /*Now we apply all of the settings that were in the file*/
+	 
+		 if (configMap.get("end")!=null) {
+			vtTrackingEndField.setText(configMap.get("end"));
+		 }
+		 
+		 if (configMap.get("output")!=null) {
+			String output = configMap.get("output");
+			if (output.equals("sql")) {
+				sqlOutputRadioButton.setSelected(true);
+			}
+			else if (output.equals("db")) {
+				databaseOutputRadioButton.setSelected(true);
+			}
+			else if (output.equals("both")) {
+				sqlAndDatabaseRadioButton.setSelected(true);
+			}
+			else {
+				databaseOutputRadioButton.setSelected(true);
+			}
+		 } else databaseOutputRadioButton.setSelected(true);
+		 
+		 if (configMap.get("sqlPath")!=null) {
+			sqlPathField.setText(configMap.get("sqlPath"));
+		 }
+		 
+		 if (configMap.containsKey("numColors")) {
+			numColorSpinner.setValue(Integer.parseInt(configMap.get("numColors")));
+		 }
+		 
+		 if (configMap.containsKey("width")) {
+			widthSpinner.setValue(Integer.parseInt(configMap.get("width")));
+		 }
+		 
+		 if (configMap.containsKey("height")) {
+			heightSpinner.setValue(Integer.parseInt(configMap.get("height")));
+		 }
+			
+		 
+		 if (configMap.containsKey("hue")) {
+			hueSpinner.setValue(Integer.parseInt(configMap.get("hue")));
+			hueSlider.setValue(Integer.parseInt(configMap.get("hue")));
+		 }
+		 
+		 if (configMap.containsKey("sat")) {
+			satSlider.setValue(Integer.parseInt(configMap.get("sat")));
+			satSpinner.setValue(Integer.parseInt(configMap.get("sat")));
+		 }
+		 
+		 if (configMap.containsKey("val")) {
+		   	valSpinner.setValue(Integer.parseInt(configMap.get("val")));
+			valSlider.setValue(Integer.parseInt(configMap.get("val")));
+		 }
+		
+		 if (configMap.get("sshHost")!=null) {
+			sshHostField.setText(configMap.get("sshHost"));
+		 }
+		
+		 if (configMap.get("sshPort")!=null) {
+			sshPortField.setText(configMap.get("sshPort"));
+		 }
+		
+		 if (configMap.get("sshUser")!=null) {
+			sshUserField.setText(configMap.get("sshUser"));
+		 }
+		
+		 if (configMap.get("sshPassword")!=null) {
+			sshPasswordField.setText(configMap.get("sshPassword"));
+		 }
+		
+		 if (configMap.get("dbHost")!=null) {
+			dbHostField.setText(configMap.get("dbHost"));
+		 }
+		
+		 if (configMap.get("dbPort")!=null) {
+			dbPortField.setText(configMap.get("dbPort"));
+		 }
+		
+		 if (configMap.get("dbName")!=null) {
+			dbNameField.setText(configMap.get("dbName"));
+		 }
+		
+		 if (configMap.get("dbUser")!=null) {
+			dbUsernameField.setText(configMap.get("dbUser"));
+		 }
+		
+		 if (configMap.get("dbPassword")!=null) {
+			dbPasswordField.setText(configMap.get("dbPassword"));
+		 }
+		
+		 if (configMap.get("start")!=null) {
+			vtTrackingStartField.setText(configMap.get("start"));
+		 }
+		 
+		 /*For RGB, visual and debug - if we check them off, we must also add them as tabs to*/
+		 /*the interface and remember their position so that we may remove them later if we have to*/
+		 if (configMap.get("rgb")!=null) {
+				if (configMap.get("rgb").equals("1")){
+					printColorCheckbox.setSelected(true);
+					indexOfRGBOutput = tabbedPane.getTabCount();
+					tabbedPane.addTab("RGB Output", null, rgbOutputPanel, null);
+				}
+				
+				else
+					printColorCheckbox.setSelected(false);
+			}
+			if (configMap.get("visual")!=null) {
+				if (configMap.get("visual").equals("1")) {
+						showColorCheckbox.setSelected(true);
+						indexOfVisualOutput = tabbedPane.getTabCount();
+						tabbedPane.addTab("Visual Output", null, viewColorPanel, null);
+				}
+				else
+					showColorCheckbox.setSelected(false);
+			}
+			if (configMap.get("debug")!=null) {
+				if (configMap.get("debug").equals("1")) {
+					debugOutputCheckbox.setSelected(true);
+					indexOfDebugOutput = tabbedPane.getTabCount();
+					tabbedPane.addTab("Debug", null, debugPanel, null);
+					debug = true;
+				}
+				else
+					debugOutputCheckbox.setSelected(false);
+			}
+		 
+		 
+		/*Add a listener to clear the debug listener*/
+		 clearButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				debugTextArea.setText("");
+				
+			}
+			 
+		 });
+		 
+		 rgbClearButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				textOutputArea.setText("");
+				
+			}
+			 
+		 });
+		 
+		 
+		
+		
+		/*Open a file system browser window to choose where to save the sql file*/
 		sqlBrowseButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 chooser = new JFileChooser();
@@ -574,60 +935,6 @@ public class ColorGUI {
         });
 		
 		
-		//If we are importing a directory, disable the useless components
-		directoryImportRadioButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				directoryField.setEnabled(true);
-				directoryBrowseButton.setEnabled(true);
-				
-				vtTrackingStartField.setEnabled(false);
-				vtTrackingEndField.setEnabled(false);
-				applyTrackingLimitButton.setEnabled(false);
-				DefaultListModel listModel = (DefaultListModel) imageList.getModel();
-				listModel.removeAllElements();
-				
-				selectAllButton.setEnabled(false);
-				deselectAllButton.setEnabled(false);
-			}
-		});
-		
-		
-		//If we are importing from a database, disable useless components and populate the image list
-		databaseImportRadioButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				ImageItem image;
-				
-				vtTrackingStartField.setEnabled(true);
-				vtTrackingEndField.setEnabled(true);
-				applyTrackingLimitButton.setEnabled(true);
-				
-				directoryField.setEnabled(false);
-				directoryBrowseButton.setEnabled(false);
-				
-				selectAllButton.setEnabled(true);
-				deselectAllButton.setEnabled(true);
-				
-				
-				
-				
-				//Get all of the images that we can actually find files for and add them to the image
-				//selection list
-				ImageProc proc = new ImageProc(dbHostField.getText(), dbNameField.getText(), dbUsernameField.getText(),
-						new String(dbPasswordField.getPassword()), "textile_img", debug, debugUtil);
-				
-				proc.fetchImages("img_detail", "", "");
-			
-				
-				imageListModel.clear();
-				while (proc.hasNextImage()) {
-					image = proc.nextImage();
-					if (image!=null) {
-						imageListModel.addElement(image.vt_tracking);
-					}
-				}
-				
-			}
-		});
 		
 		
 		//If we want to output directly to the database, we do not need to input an sql filename
@@ -666,7 +973,7 @@ public class ColorGUI {
 		});
 		
 		
-		//Make sure hue sliders match hue spinners
+		//Make sure hue/sat/val sliders match their respective spinners
 		hueSlider.addChangeListener(new ChangeListener() {
 
 			@Override
@@ -716,7 +1023,7 @@ public class ColorGUI {
 		});
 		
 		
-		//If we select images from our list, enable the processing button, otherwise disable it
+		//We make sure that the 'process' button is only active if there are images selected
 		imageList.addListSelectionListener(new ListSelectionListener() {
 
 			@Override
@@ -746,7 +1053,7 @@ public class ColorGUI {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				ImageItem image;
+				String trackingID;
 				
 				vtTrackingStartField.setEnabled(true);
 				vtTrackingEndField.setEnabled(true);
@@ -754,24 +1061,42 @@ public class ColorGUI {
 				directoryField.setEnabled(false);
 				directoryBrowseButton.setEnabled(false);
 				
-				
-				//ImageProc proc = new ImageProc("localhost:8889", "vtmast_dev", "root", "root", "Textile_img", debug, debugUtil);
-				
-				ImageProc proc = new ImageProc(dbHostField.getText(), dbNameField.getText(), dbUsernameField.getText(),
-						new String(dbPasswordField.getPassword()), "textile_img", debug, debugUtil);
-				proc.fetchImages("img_detail", vtTrackingStartField.getText(), vtTrackingEndField.getText());
-				int count = 0;
+								
+				ImageProc proc;
+				try {
+					proc = new ImageProc(sshHostField.getText(), sshPortField.getText(), sshUserField.getText(), 
+							new String(sshPasswordField.getPassword()), dbHostField.getText(), dbPortField.getText(), dbNameField.getText(), 
+							dbUsernameField.getText(), new String(dbPasswordField.getPassword()), 
+							"textile_img", debug, debugUtil);
+				} catch (SQLException e1) {
+					JOptionPane.showMessageDialog(null, "Could not connect to MySQL!");
+					e1.printStackTrace();
+					return;
+				} catch (JSchException e1) {
+					JOptionPane.showMessageDialog(null, "SSH failed. Could not connect to server!");
+					e1.printStackTrace();
+					return;
+				}
+				proc.fetchImageIds("img_detail", vtTrackingStartField.getText(), vtTrackingEndField.getText());
+			
 				
 				imageListModel.clear();
-				while (proc.hasNextImage()) {
-					image = proc.nextImage();
-					if (image!=null) {
-						imageListModel.addElement(image.vt_tracking);
-						System.out.println(image.vt_tracking);
-						count++;
+				while (proc.hasNextImageID()) {
+					try {
+						trackingID = proc.nextImageID();
+						imageListModel.addElement(trackingID);
+					} catch (SQLException e1) {
+						debugUtil.error(e1.getMessage());
 					}
+					
 				}
-				System.out.println(count);
+				
+				try {
+					proc.endConnection();
+				} catch(NullPointerException e1) {
+					
+				}
+				
 				
 			}
 			
@@ -862,7 +1187,7 @@ public class ColorGUI {
 		});
 		
 		
-		
+		/*Button to select all images in the currently visible list*/
 		selectAllButton.addActionListener(new ActionListener() {
 
 			@Override
@@ -879,6 +1204,7 @@ public class ColorGUI {
 			
 		});
 		
+		/*Button to deselect all images in the currently visible list*/
 		deselectAllButton.addActionListener(new ActionListener() {
 
 			@Override
@@ -889,11 +1215,85 @@ public class ColorGUI {
 			
 		});
 		
+		/*Button to save all current settings*/
+		saveButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					//Simply write all settings to 'config.txt'
+					PrintWriter writer = new PrintWriter("config.txt", "UTF-8");
+					writer.println("sshHost:"+sshHostField.getText());
+					writer.println("sshPort:"+sshPortField.getText());
+					writer.println("sshUser:"+sshUserField.getText());
+					writer.println("sshPassword:"+new String(sshPasswordField.getPassword()));
+					
+					writer.println("dbHost:"+dbHostField.getText());
+					writer.println("dbPort:"+dbPortField.getText());
+					writer.println("dbUser:"+dbUsernameField.getText());
+					writer.println("dbName:"+dbNameField.getText());
+					writer.println("dbPassword:"+new String(dbPasswordField.getPassword()));
+					
+					if (databaseOutputRadioButton.isSelected()) {
+						writer.println("output:db");
+					}
+					else if (sqlOutputRadioButton.isSelected()) {
+						writer.println("output:sql");
+					}
+					else {
+						writer.println("output:both");
+					}
+					
+					
+					if(showColorCheckbox.isSelected()) {
+						writer.println("visual:1");
+					}
+					if(printColorCheckbox.isSelected()) {
+						writer.println("rgb:1");
+					}
+					if (debugOutputCheckbox.isSelected()) {
+						writer.println("debug:1");
+					}
+					
+					writer.println("width:"+widthSpinner.getValue());
+					writer.println("height:"+heightSpinner.getValue());
+					
+					writer.println("start:"+vtTrackingStartField.getText());
+					writer.println("end:"+vtTrackingEndField.getText());
+					
+					writer.println("sqlPath:"+sqlPathField.getText());
+					
+					writer.println("numColors:"+ numColorSpinner.getValue());
+					
+					writer.println("hue:"+hueSlider.getValue());
+					writer.println("sat:"+satSlider.getValue());
+					writer.println("val:"+valSlider.getValue());
+					
+					writer.close();
+					
+				} catch (FileNotFoundException e1) {
+					JOptionPane.showMessageDialog(null, "Could not create settings file!");
+					e1.printStackTrace();
+				} catch (UnsupportedEncodingException e1) {
+					JOptionPane.showMessageDialog(null, "UTF-8 not supported!");
+					e1.printStackTrace();
+				}
+			}
+		});
+		
 		
 		
 		//Process button will process the images with all of the selected options
 		processImagesButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				
+				//If we want to generate an SQL file but haven't given a path, then abort
+				if (!databaseOutputRadioButton.isSelected() && sqlPathField.getText().isEmpty()) {
+					JOptionPane.showMessageDialog(null, "Please input a path to generate a .sql file in Output Preferences");
+					return;
+				}
+				
+				
+				
+				
 				int hOffset, sOffset, vOffset;
                 hOffset = hueSlider.getValue();
                 sOffset = satSlider.getValue();
@@ -903,31 +1303,36 @@ public class ColorGUI {
                 RepColors col = new RepColors(debugUtil);
                 col.debug = debug;
                
-                ImageProc proc = new ImageProc(dbHostField.getText(), dbNameField.getText(), dbUsernameField.getText(),
-						new String(dbPasswordField.getPassword()), "textile_img", debug, debugUtil);
-                col.refColors = proc.loadRefColors("Color_detail");
+                ImageProc proc;
+				try {
+					proc = new ImageProc(sshHostField.getText(), sshPortField.getText(), sshUserField.getText(), 
+							new String(sshPasswordField.getPassword()), dbHostField.getText(), dbPortField.getText(), dbNameField.getText(), 
+							dbUsernameField.getText(), new String(dbPasswordField.getPassword()), 
+							"textile_img", debug, debugUtil);
+				} catch (SQLException e1) {
+					JOptionPane.showMessageDialog(null, "Could not connect to MySQL!");
+					e1.printStackTrace();
+					return;
+				} catch (JSchException e1) {
+					JOptionPane.showMessageDialog(null, "SSH failed. Could not connect to server!");
+					e1.printStackTrace();
+					return;
+				}
+                col.refColors = proc.loadRefColors("color_detail");
                 int numColors = (int) numColorSpinner.getValue();
 
                 //Fetch images from database or directory
                 LinkedList<ImageItem> images = new LinkedList<>();
-                if (databaseImportRadioButton.isSelected()) {
+                // if (databaseImportRadioButton.isSelected()) {
                     proc.fetchImageList("img_detail", selectedImages);
                     while (proc.hasNextImage()) {
-                        images.add(proc.nextImage());
+                        try {
+							images.add(proc.nextImage((Integer)widthSpinner.getValue(), (Integer)heightSpinner.getValue()));
+						} catch (SQLException e1) {
+							debugUtil.error(e1.getMessage());
+						}
                     }
-                }
-                else { 
-                    LinkedList<File> files = new LinkedList<>();
-                    recurseDirectory(new File(directoryField.getText()), files);
-                    
-                   
-
-                    //Process all files in the list
-                    for (File file : files) {
-                        images.add(proc.readImageFromFile(file.getAbsolutePath()));
-                        
-                    }
-                }
+ 
                 
                 textOutputArea.setText("");
                 
@@ -1004,18 +1409,29 @@ public class ColorGUI {
                             }
                            
                     	}
+                    	
+                    	
                     }
                     if (!databaseOutputRadioButton.isSelected() && out!=null) {
                     	out.close();
+                    	proc.endConnection();
                     }
                 }
                 catch (IOException er ) {
                     debugUtil.error("Could not open SQL script file for writing.");
+                    JOptionPane.showMessageDialog(null, "Could not open SQL script file for writing");
+                    proc.endConnection();
                     if (debug) er.printStackTrace();
+                }
+                
+                try {
+                	proc.endConnection();
+                } catch(NullPointerException e1) {
+                	
                 }
 
                 
-
+                
 			}
 		});
 				
